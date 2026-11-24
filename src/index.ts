@@ -67,6 +67,7 @@ export {
   createMotionNode,
   MotionAfterSchema,
   MotionInputSchema,
+  type MotionAfter,
   MotionShareSchema,
   MotionStateSchema,
   MotionStyleSchema,

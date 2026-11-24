@@ -134,6 +134,14 @@ export interface CompileOptions {
   spaceBase?: number;
   /** The component ids that act as scenes (default: `['ui/scene']`). */
   sceneComponents?: readonly string[];
+  /**
+   * Emit pure CSS rules only — no plan, no runtime required.
+   *
+   * hover/press/focus → pseudo-class transitions; view → scroll-driven animation;
+   * load → regular keyframe animation. data, route and leave inputs are skipped.
+   * Choreography delays are not emitted in this mode.
+   */
+  cssOnly?: boolean;
 }
 
 const TRANSITION_PROPS = 'transform, opacity, clip-path, filter, box-shadow, border-radius';
@@ -229,6 +237,76 @@ function compileNode(node: MotionNode, m: NodeMotion, delays: Map<string, number
   return { css, plan };
 }
 
+function cssOnlyTransitionProps(style: MotionStyle): string[] {
+  const props: string[] = [];
+  if (style.x !== undefined || style.y !== undefined || style.scale !== undefined || style.rotate !== undefined) props.push('transform');
+  if (style.opacity !== undefined) props.push('opacity');
+  if (style.clip !== undefined || style.clipStart !== undefined) props.push('clip-path');
+  if (style.blur !== undefined) props.push('filter');
+  if (style.shadow !== undefined) props.push('box-shadow');
+  if (style.radius !== undefined) props.push('border-radius');
+  return props;
+}
+
+function cssOnlyToDecls(style: MotionStyle): string[] {
+  const out: string[] = [];
+  if (style.x !== undefined || style.y !== undefined || style.scale !== undefined || style.rotate !== undefined) out.push('transform: none');
+  if (style.opacity !== undefined) out.push('opacity: 1');
+  if (style.clip !== undefined) out.push(`clip-path: ${style.clip === 'circle' ? CLIP_REST.circle : CLIP_REST.inset}`);
+  else if (style.clipStart !== undefined) out.push('clip-path: inset(0 0 0 0)');
+  if (style.blur !== undefined) out.push('filter: blur(0px)');
+  if (style.shadow !== undefined && style.shadow !== 'none') out.push('box-shadow: none');
+  if (style.radius !== undefined) out.push('border-radius: 0');
+  return out;
+}
+
+function compileNodeCssOnly(node: MotionNode, m: NodeMotion): string[] {
+  const sel = nodeSelector(node.id);
+  const css: string[] = [];
+  const byId = new Map(m.states.map((s) => [s.id, s]));
+  const id = node.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+  for (const t of m.transitions) {
+    const toState = byId.get(t.to);
+    const fromState = byId.get(t.from);
+    const { duration, easing } = timingVars(t.with);
+    const input = t.on.input;
+
+    if (input === 'hover' || input === 'press' || input === 'focus') {
+      if (!toState) continue;
+      const decl = styleDeclarations(toState.style);
+      if (!decl.length) continue;
+      const pseudo = input === 'hover' ? ':hover' : input === 'press' ? ':active' : ':focus-within';
+      const props = cssOnlyTransitionProps(toState.style);
+      if (props.length) css.push(`${sel} { transition: ${props.map((p) => `${p} ${duration} ${easing}`).join(', ')}; }`);
+      css.push(`${sel}${pseudo} { ${decl.join('; ')}; }`);
+    } else if (input === 'view') {
+      if (!fromState) continue;
+      const fromDecl = styleDeclarations(fromState.style);
+      if (!fromDecl.length) continue;
+      const toDecl = cssOnlyToDecls(fromState.style);
+      const name = `impkt-m-${id}-enter`;
+      const amount = t.on.amount;
+      css.push(`@keyframes ${name} {\n  from { ${fromDecl.join('; ')}; }\n  to { ${toDecl.join('; ')}; }\n}`);
+      css.push(`${sel} { animation: ${name} ${duration} ${easing} both; animation-timeline: view(); animation-range: entry 0% entry ${Math.round(amount * 100)}%; }`);
+      css.push(`@supports not (animation-timeline: view()) { ${sel} { ${toDecl.join('; ')}; } }`);
+      css.push(`@media (prefers-reduced-motion: reduce) { ${sel} { animation: none; ${toDecl.join('; ')}; } }`);
+    } else if (input === 'load') {
+      if (!fromState) continue;
+      const fromDecl = styleDeclarations(fromState.style);
+      if (!fromDecl.length) continue;
+      const toDecl = cssOnlyToDecls(fromState.style);
+      const name = `impkt-m-${id}-load`;
+      css.push(`@keyframes ${name} {\n  from { ${fromDecl.join('; ')}; }\n  to { ${toDecl.join('; ')}; }\n}`);
+      css.push(`${sel} { animation: ${name} ${duration} ${easing} both; }`);
+      css.push(`@media (prefers-reduced-motion: reduce) { ${sel} { animation: none; ${toDecl.join('; ')}; } }`);
+    }
+    // data, route, leave: not expressible in pure CSS
+  }
+
+  return css;
+}
+
 /**
  * Compile every node's motion.
  *
@@ -236,6 +314,16 @@ function compileNode(node: MotionNode, m: NodeMotion, delays: Map<string, number
  * issues that could not be resolved.
  */
 export function compileMotion(nodes: readonly MotionNode[], options: CompileOptions = {}): CompiledMotion {
+  if (options.cssOnly) {
+    const css: string[] = [];
+    for (const n of nodes) {
+      if (!n.motion) continue;
+      css.push(...compileNodeCssOnly(n, n.motion));
+    }
+    if (css.length) css.push(`@media (prefers-reduced-motion: reduce) { [${MOTION_ATTR}] { animation: none !important; transition: none !important; } }`);
+    return { css: css.join('\n'), plan: { nodes: [], scenes: [] }, issues: [] };
+  }
+
   const motion = resolveMotion(options.motion, options.spaceBase);
   const { delays, issues } = resolveChoreography(nodes, motion);
   const scenes = new Set(options.sceneComponents ?? ['ui/scene']);

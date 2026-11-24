@@ -7,7 +7,7 @@
  * `MotionLayer` renders the compiled stylesheet and starts the runtime
  * as a side-effect — drop it once inside your page component.
  */
-import { useEffect, useMemo, useRef, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { compileMotion, type CompiledMotion, type CompileOptions } from './compile';
 import { startMotion, type RuntimeOptions } from './runtime';
 import type { MotionNode } from './schemas';
@@ -114,4 +114,38 @@ export function MotionLayer({ compiled, options }: MotionLayerProps) {
  */
 export function motionAttr(id: string): { 'data-motion': string } {
   return { 'data-motion': id };
+}
+
+/**
+ * Returns a 0–1 scroll progress value for an element as it passes through
+ * the viewport. 0 when the bottom of the element is at the bottom of the
+ * viewport; 1 when the top is at the top.
+ *
+ * @example
+ * function Section({ children }: { children: React.ReactNode }) {
+ *   const ref = useRef<HTMLDivElement>(null);
+ *   const progress = useScrollProgress(ref);
+ *   return <div ref={ref} style={{ opacity: progress }}>{children}</div>;
+ * }
+ */
+export function useScrollProgress(ref: RefObject<Element | null>): number {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const p = (vh - rect.top) / (vh + rect.height);
+      setProgress(Math.max(0, Math.min(1, p)));
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    update();
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, [ref]);
+  return progress;
 }
