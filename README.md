@@ -108,13 +108,15 @@ type MotionTransition = {
   id: string;
   from: string;             // source state id, or 'rest'
   to: string;               // target state id
-  on: MotionInput;          // 'load' | 'view' | 'hover' | 'press' | 'focus' | 'route' | 'data'
+  on: MotionInput;          // 'load' | 'view' | 'hover' | 'press' | 'focus' | 'route' | 'data' | 'leave'
   with?: MotionTiming;      // { spring?, duration?, easing?, delay? }
-  after?: MotionAfter;      // choreography: { node, offset? }
+  after?: MotionAfter;      // choreography: { node, offset? } | { group, offset? }
   reverse?: boolean;        // return to 'from' state when input ends
-  reduced?: 'skip' | 'cut' | 'fade'; // behaviour under reduced-motion
+  reduced?: 'cut' | 'fade'; // behaviour under reduced-motion
 };
 ```
+
+The `leave` input fires when `handle.leave()` is called (before a navigation or unmount). Use it for exit animations that play as the page or element disappears.
 
 ### Timelines
 
@@ -131,13 +133,29 @@ type MotionTimeline = {
 
 Nodes can stagger after each other. The compiler resolves the `after` graph into concrete millisecond delays and reports cycles or missing nodes as issues.
 
+### Node-based stagger
+
+Each node explicitly names the one it follows:
+
 ```ts
 createMotionNode('card-1', preset('rise', { node: 'hero' }));
 createMotionNode('card-2', preset('rise', { node: 'card-1' }));
 createMotionNode('card-3', preset('rise', { node: 'card-2', offset: 'loose' }));
 ```
 
-`offset` defaults to `'base'` and can be `'tight'`, `'base'` or `'loose'` — resolved from the `--impkt-motion-stagger-*` tokens.
+### Stagger groups
+
+Give every node in a row the same `group` name and they chain in document order automatically. No manual linking required:
+
+```ts
+createMotionNode('a', preset('rise', { group: 'cards' }));
+createMotionNode('b', preset('rise', { group: 'cards' }));
+createMotionNode('c', preset('rise', { group: 'cards', offset: 'loose' }));
+```
+
+The first group member starts immediately; each subsequent member starts after the previous one by its `offset`.
+
+`offset` defaults to `'base'` and can be `'tight'`, `'base'`, `'loose'` or `'none'` — resolved from the `--impkt-motion-stagger-*` tokens.
 
 ### Shared elements (page transitions)
 
@@ -172,15 +190,27 @@ createMotionNode('card', { share: { name: 'case-kleidi' } });
 | `blur-out` | Heavy blur reveal |
 | `hero-rise` | Load-triggered rise (above-fold elements) |
 | `hero-words` | Load-triggered per-word rise |
+| `fade-out` | Exit: fade to transparent |
+| `rise-out` | Exit: fade and rise away |
+| `sink-out` | Exit: fade and sink |
+| `scale-out` | Exit: fade and scale down |
 
 ```ts
 import { preset } from '@atomic-ui/motion';
 
-// Simple
+// Simple entrance
 createMotionNode('card', preset('rise'));
 
-// With choreography: fires 'tight' stagger after 'hero'
+// Stagger after a specific node
 createMotionNode('card', preset('rise', { node: 'hero', offset: 'tight' }));
+
+// Stagger group: auto-chain in document order
+createMotionNode('a', preset('rise', { group: 'cards' }));
+createMotionNode('b', preset('rise', { group: 'cards' }));
+
+// Exit animation
+createMotionNode('page', preset('fade-out'));
+// Then: await handle.leave() before navigating
 ```
 
 ## Design tokens
@@ -258,6 +288,24 @@ handle.destroy();            // remove all listeners
 
 `routeTransition()` and `leaveAll()` are also exported as standalone helpers.
 
+### Exit animations
+
+Transitions with `on: { input: 'leave' }` fire when `handle.leave()` is called. Use them for explicit page/component exits:
+
+```ts
+const nodes = [
+  createMotionNode('hero', preset('hero-rise')),
+  createMotionNode('hero-exit', preset('fade-out')),
+];
+const handle = startMotion(document, plan);
+
+// Before navigating away:
+await handle.leave();
+router.push('/next-page');
+```
+
+The exit presets (`fade-out`, `rise-out`, `sink-out`, `scale-out`) target `on: { input: 'leave' }` automatically.
+
 ### Split text
 
 `startMotion` will call `splitText` automatically on nodes whose plan has `split: 'words'` or `split: 'chars'`. You can call it yourself too:
@@ -268,6 +316,53 @@ import { splitText } from '@atomic-ui/motion/runtime';
 splitText(element, 'words');
 ```
 
+## React hooks
+
+### `useScrollProgress`
+
+Returns a 0–1 scroll progress value for an element as it passes through the viewport. Useful for parallax and scroll-linked effects that need a JS value rather than scroll-driven CSS.
+
+```tsx
+import { useRef } from 'react';
+import { useScrollProgress } from '@atomic-ui/motion/react';
+
+function Section() {
+  const ref = useRef<HTMLDivElement>(null);
+  const progress = useScrollProgress(ref);
+
+  return (
+    <div ref={ref} style={{ opacity: progress }}>
+      Content
+    </div>
+  );
+}
+```
+
+`0` when the element's bottom is at the viewport bottom; `1` when its top is at the viewport top.
+
+## Vite plugin
+
+Compile motion nodes at build time and import the CSS as a virtual module:
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { motionPlugin } from '@atomic-ui/motion/vite';
+import { myNodes } from './src/motion';
+
+export default defineConfig({
+  plugins: [motionPlugin({ nodes: myNodes })],
+});
+```
+
+```ts
+// main.ts
+import css from 'virtual:@atomic-ui/motion-styles';
+document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
+```
+
+Pass any `CompileOptions` alongside `nodes` to control the personality or CSS-only mode.
+
 ## Compile options
 
 ```ts
@@ -276,11 +371,20 @@ compileMotion(nodes, {
     personality: 'calm',   // token set to compile into CSS vars
     speed: 1.0,
   },
-  issues: 'warn',          // 'warn' | 'throw' | 'ignore' (default: 'warn')
 });
 ```
 
 The returned `issues` array lists choreography problems (cycles, missing nodes, duplicate state ids) independently of the CSS and plan — the CSS and plan are always returned even when issues are present.
+
+### CSS-only mode
+
+Pass `cssOnly: true` to emit pure CSS without a runtime plan. `hover`, `press` and `focus` become pseudo-class transitions; `view` becomes a scroll-driven keyframe animation; `load` becomes a regular keyframe animation. `data`, `route` and `leave` inputs are skipped.
+
+```ts
+const { css } = compileMotion(nodes, { cssOnly: true });
+```
+
+This mode suits static sites and simple pages that don't need choreography, data-driven state changes, or exit animations. The returned `plan` is empty.
 
 ## Reduced motion
 

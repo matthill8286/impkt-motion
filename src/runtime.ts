@@ -209,6 +209,9 @@ export function startMotion(root: ParentNode, plan: MotionPlan, options: Runtime
           dataListeners.set(t.on.path, list);
           break;
         }
+        case 'leave':
+          // Collected below, fired by handle.leave().
+          break;
       }
     }
   }
@@ -236,7 +239,9 @@ export function startMotion(root: ParentNode, plan: MotionPlan, options: Runtime
   for (const node of plan.nodes) {
     const el = root.querySelector<HTMLElement>(nodeSelector(node.id));
     if (!el) continue;
-    for (const t of node.transitions) if (t.on.input === 'route' && t.on.direction === 'exit') exits.push({ el, node, t });
+    for (const t of node.transitions) {
+      if ((t.on.input === 'route' && t.on.direction === 'exit') || t.on.input === 'leave') exits.push({ el, node, t });
+    }
   }
 
   const handle: MotionHandle = {

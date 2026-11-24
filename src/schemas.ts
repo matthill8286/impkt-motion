@@ -68,6 +68,7 @@ export const MotionInputSchema = z.discriminatedUnion('input', [
     input: z.literal('data'),
     path: z.string().min(1),
   }),
+  z.strictObject({ input: z.literal('leave') }),
 ]);
 export type MotionInput = z.infer<typeof MotionInputSchema>;
 
@@ -79,14 +80,21 @@ export const MotionTimingSchema = z.union([
 export type MotionTiming = z.infer<typeof MotionTimingSchema>;
 
 /**
- * Choreography as a relationship: this transition starts after another one,
- * offset by a stagger token. The compiler resolves the graph into delays.
+ * Choreography as a relationship: this transition starts after another node's
+ * transition, or after every other member of a named stagger group.
  */
-export const MotionAfterSchema = z.strictObject({
-  node: z.string().min(1),
-  transition: IdSchema.optional(),
-  offset: z.enum([...STAGGER_NAMES, 'none'] as [string, ...string[]]).default('base'),
-});
+export const MotionAfterSchema = z.union([
+  z.strictObject({
+    node: z.string().min(1),
+    transition: IdSchema.optional(),
+    offset: z.enum([...STAGGER_NAMES, 'none'] as [string, ...string[]]).default('base'),
+  }),
+  z.strictObject({
+    group: z.string().min(1),
+    offset: z.enum([...STAGGER_NAMES, 'none'] as [string, ...string[]]).default('base'),
+  }),
+]);
+export type MotionAfter = z.infer<typeof MotionAfterSchema>;
 
 export const ReducedSchema = z.enum(['cut', 'fade']);
 
@@ -196,5 +204,5 @@ export function createMotionNode(
   motion?: NodeMotion,
   options?: { parentId?: string; component?: string; props?: Record<string, unknown> },
 ): MotionNode {
-  return { id, ...(motion ? { motion } : {}), ...options };
+  return { id, ...(motion ? { motion: NodeMotionSchema.parse(motion) } : {}), ...options };
 }

@@ -96,21 +96,64 @@ export const PRESETS = {
     states: [{ id: 'shaking', name: 'Shaking', style: { x: 6, rotate: -1 } }],
     transitions: [{ id: 'shake', from: 'rest', to: 'shaking', on: { input: 'press' }, with: { easing: 'standard', duration: 'fast' }, reverse: true }],
   } satisfies Input,
+
+  // ─── Exit animations ─────────────────────────────────────────────────────
+
+  /** Fades out when `leave()` is called. Pair with `fade` or `hero-rise`. */
+  'fade-out': {
+    states: [{ id: 'exit', name: 'Exit', style: { opacity: 0 } }],
+    transitions: [{ id: 'exit', from: 'rest', to: 'exit', on: { input: 'leave' }, with: { easing: 'exit', duration: 'base' } }],
+  } satisfies Input,
+
+  /** Fades out and rises away. */
+  'rise-out': {
+    states: [{ id: 'exit', name: 'Exit', style: { opacity: 0, y: '-distance.near' } }],
+    transitions: [{ id: 'exit', from: 'rest', to: 'exit', on: { input: 'leave' }, with: { spring: 'gentle' } }],
+  } satisfies Input,
+
+  /** Fades out and sinks. */
+  'sink-out': {
+    states: [{ id: 'exit', name: 'Exit', style: { opacity: 0, y: 'distance.near' } }],
+    transitions: [{ id: 'exit', from: 'rest', to: 'exit', on: { input: 'leave' }, with: { spring: 'gentle' } }],
+  } satisfies Input,
+
+  /** Fades out and scales down slightly. */
+  'scale-out': {
+    states: [{ id: 'exit', name: 'Exit', style: { opacity: 0, scale: 0.9 } }],
+    transitions: [{ id: 'exit', from: 'rest', to: 'exit', on: { input: 'leave' }, with: { easing: 'exit', duration: 'base' } }],
+  } satisfies Input,
 } as const satisfies Record<string, Input>;
 
 export type PresetName = keyof typeof PRESETS;
 
+type StaggerOffset = 'tight' | 'base' | 'loose' | 'none';
+
 /**
- * A preset as a fresh motion block, optionally following another node so a
- * row of cards staggers. Parsed with all schema defaults applied.
+ * A preset as a fresh motion block, optionally following another node or a
+ * stagger group so a row of cards staggers. Parsed with all schema defaults applied.
  *
  * @example
  * const heroMotion = preset('rise');
  * const cardMotion = preset('rise', { node: 'hero' });
  * const thirdCard  = preset('rise', { node: 'card-2', offset: 'loose' });
+ * // Group: each member staggers after the previous one in document order.
+ * const a = preset('rise', { group: 'cards' });
+ * const b = preset('rise', { group: 'cards' });
+ * const c = preset('rise', { group: 'cards', offset: 'loose' });
  */
-export function preset(name: PresetName, follow?: { node: string; offset?: 'tight' | 'base' | 'loose' | 'none' }): NodeMotion {
+export function preset(
+  name: PresetName,
+  follow?: { node: string; offset?: StaggerOffset } | { group: string; offset?: StaggerOffset },
+): NodeMotion {
   const block = structuredClone(PRESETS[name]) as { transitions: Array<Record<string, unknown>> };
-  if (follow) for (const t of block.transitions) t.after = { node: follow.node, offset: follow.offset ?? 'base' };
+  if (follow) {
+    for (const t of block.transitions) {
+      if ('node' in follow) {
+        t.after = { node: follow.node, offset: follow.offset ?? 'base' };
+      } else {
+        t.after = { group: follow.group, offset: follow.offset ?? 'base' };
+      }
+    }
+  }
   return NodeMotionSchema.parse(block);
 }
