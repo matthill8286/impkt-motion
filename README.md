@@ -1,4 +1,4 @@
-# @impkt/motion
+# @atomic-ui/motion
 
 Motion compiled to the platform — states, transitions, timelines and choreography, with a zero-script fallback.
 
@@ -14,23 +14,23 @@ The runtime (`startMotion`) attaches to the DOM, listens for inputs (load, scrol
 ## Install
 
 ```bash
-npm install @impkt/motion
+npm install @atomic-ui/motion
 ```
 
 React integration and tokens utility are opt-in:
 
 ```ts
-import { startMotion } from '@impkt/motion/runtime';
-import { useMotion }    from '@impkt/motion/react';
-import { injectMotionTokens } from '@impkt/motion/tokens';
+import { startMotion } from '@atomic-ui/motion/runtime';
+import { useMotion }    from '@atomic-ui/motion/react';
+import { injectMotionTokens } from '@atomic-ui/motion/tokens';
 ```
 
 ## Quick start
 
 ```ts
-import { compileMotion, createMotionNode, preset } from '@impkt/motion';
-import { startMotion } from '@impkt/motion/runtime';
-import { injectMotionTokens } from '@impkt/motion/tokens';
+import { compileMotion, createMotionNode, preset } from '@atomic-ui/motion';
+import { startMotion } from '@atomic-ui/motion/runtime';
+import { injectMotionTokens } from '@atomic-ui/motion/tokens';
 
 // 1. Inject CSS custom properties for motion tokens (once, in the browser).
 injectMotionTokens({ personality: 'lively' });
@@ -60,7 +60,7 @@ handle.data('price.updated');
 A node is any element in your tree that can carry motion. Only the `id` is required; all other fields are optional.
 
 ```ts
-import { createMotionNode } from '@impkt/motion';
+import { createMotionNode } from '@atomic-ui/motion';
 
 const node = createMotionNode(
   'card',           // unique id — matches data-motion="card" on the DOM element
@@ -174,7 +174,7 @@ createMotionNode('card', { share: { name: 'case-kleidi' } });
 | `hero-words` | Load-triggered per-word rise |
 
 ```ts
-import { preset } from '@impkt/motion';
+import { preset } from '@atomic-ui/motion';
 
 // Simple
 createMotionNode('card', preset('rise'));
@@ -188,7 +188,7 @@ createMotionNode('card', preset('rise', { node: 'hero', offset: 'tight' }));
 Motion personality and speed are sourced from CSS custom properties. Set them once at page load.
 
 ```ts
-import { injectMotionTokens } from '@impkt/motion/tokens';
+import { injectMotionTokens } from '@atomic-ui/motion/tokens';
 
 injectMotionTokens({
   personality: 'lively',   // 'calm' | 'lively' | 'expressive'
@@ -199,7 +199,7 @@ injectMotionTokens({
 Or inline the stylesheet into your SSR template:
 
 ```ts
-import { motionTokensStylesheet } from '@impkt/motion/tokens';
+import { motionTokensStylesheet } from '@atomic-ui/motion/tokens';
 
 const style = motionTokensStylesheet({ personality: 'expressive', speed: 1.1 });
 // <style>${style}</style>
@@ -208,8 +208,8 @@ const style = motionTokensStylesheet({ personality: 'expressive', speed: 1.1 });
 ## React
 
 ```tsx
-import { useMotion, MotionLayer, motionAttr } from '@impkt/motion/react';
-import { startMotion } from '@impkt/motion/runtime';
+import { useMotion, MotionLayer, motionAttr } from '@atomic-ui/motion/react';
+import { startMotion } from '@atomic-ui/motion/runtime';
 
 function Page() {
   const nodes = useMemo(() => [
@@ -240,7 +240,7 @@ function Page() {
 ## Runtime API
 
 ```ts
-import { startMotion } from '@impkt/motion/runtime';
+import { startMotion } from '@atomic-ui/motion/runtime';
 
 const handle = startMotion(
   document,  // root — any element or Document
@@ -263,7 +263,7 @@ handle.destroy();            // remove all listeners
 `startMotion` will call `splitText` automatically on nodes whose plan has `split: 'words'` or `split: 'chars'`. You can call it yourself too:
 
 ```ts
-import { splitText } from '@impkt/motion/runtime';
+import { splitText } from '@atomic-ui/motion/runtime';
 
 splitText(element, 'words');
 ```

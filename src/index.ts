@@ -6,9 +6,9 @@
  *
  * Quick start:
  * ```ts
- * import { compileMotion, createMotionNode, preset } from '@impkt/motion';
- * import { startMotion } from '@impkt/motion/runtime';
- * import { injectMotionTokens } from '@impkt/motion/tokens';
+ * import { compileMotion, createMotionNode, preset } from '@atomic-ui/motion';
+ * import { startMotion } from '@atomic-ui/motion/runtime';
+ * import { injectMotionTokens } from '@atomic-ui/motion/tokens';
  *
  * // Inject CSS custom properties for the motion tokens.
  * injectMotionTokens({ personality: 'lively' });

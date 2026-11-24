@@ -1,5 +1,5 @@
 {
-  "name": "@impkt/motion",
+  "name": "@atomic-ui/motion",
   "version": "0.2.0",
   "description": "Motion compiled to the platform — states, transitions, timelines and choreography, with a zero-script fallback.",
   "type": "module",
