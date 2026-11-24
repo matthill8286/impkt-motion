@@ -3,13 +3,25 @@
   "version": "0.2.0",
   "description": "Motion compiled to the platform — states, transitions, timelines and choreography, with a zero-script fallback.",
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./runtime": "./src/runtime.ts",
-    "./react": "./src/react.tsx",
-    "./tokens": "./src/tokens.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens.d.ts",
+      "import": "./dist/tokens.js"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -40,27 +52,7 @@
     "README.md"
   ],
   "publishConfig": {
-    "access": "public",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js"
-      },
-      "./runtime": {
-        "types": "./dist/runtime.d.ts",
-        "import": "./dist/runtime.js"
-      },
-      "./react": {
-        "types": "./dist/react.d.ts",
-        "import": "./dist/react.js"
-      },
-      "./tokens": {
-        "types": "./dist/tokens.d.ts",
-        "import": "./dist/tokens.js"
-      }
-    }
+    "access": "public"
   },
   "keywords": [
     "motion",
@@ -76,6 +68,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/matthill8286/impkt-motion"
+    "url": "git+https://github.com/matthill8286/impkt-motion.git"
   }
 }
