@@ -9,7 +9,7 @@
  *   delays) becomes the plan, which the runtime reads.
  *
  * Nothing hides content without script. A node's initial state applies only
- * under `.impkt-motion`, which the runtime adds once it is running.
+ * under `.impakt-motion`, which the runtime adds once it is running.
  */
 import { REST_STATE, type MotionNode, type MotionStyle, type MotionTiming, type NodeMotion } from './schemas';
 import { cssVarName, resolveMotion, type MotionInputs } from './tokens';
@@ -18,11 +18,11 @@ import { keyOf, resolveChoreography, type ChoreographyIssue } from './choreograp
 export const MOTION_ATTR = 'data-motion';
 export const STATE_ATTR = 'data-motion-state';
 export const SCENE_ATTR = 'data-motion-scene';
-export const SCENE_TIMELINE = '--impkt-scene';
-export const SHARE_PREFIX = 'impkt-share-';
+export const SCENE_TIMELINE = '--impakt-scene';
+export const SHARE_PREFIX = 'impakt-share-';
 export const shareName = (name: string) => `${SHARE_PREFIX}${name}`;
-export const ACTIVE_CLASS = 'impkt-motion';
-export const REDUCED_CLASS = 'impkt-motion-reduced';
+export const ACTIVE_CLASS = 'impakt-motion';
+export const REDUCED_CLASS = 'impakt-motion-reduced';
 /**
  * On the root while an editor scrubs a scene. Every timeline is then held
  * still, whatever drives it on the live page. The editor sets each
@@ -173,7 +173,7 @@ function compileNode(node: MotionNode, m: NodeMotion, delays: Map<string, number
   }
 
   if (m.timeline) {
-    const name = `impkt-m-${node.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+    const name = `impakt-m-${node.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
     const byId = new Map(m.states.map((s) => [s.id, s.style]));
     const keyed = m.timeline.keys.map((k) => (k.state === REST_STATE ? {} : byId.get(k.state) ?? {}));
     const moves = (prop: keyof MotionStyle) => keyed.some((st) => st[prop] !== undefined);
@@ -285,7 +285,7 @@ function compileNodeCssOnly(node: MotionNode, m: NodeMotion): string[] {
       const fromDecl = styleDeclarations(fromState.style);
       if (!fromDecl.length) continue;
       const toDecl = cssOnlyToDecls(fromState.style);
-      const name = `impkt-m-${id}-enter`;
+      const name = `impakt-m-${id}-enter`;
       const amount = t.on.amount;
       css.push(`@keyframes ${name} {\n  from { ${fromDecl.join('; ')}; }\n  to { ${toDecl.join('; ')}; }\n}`);
       css.push(`${sel} { animation: ${name} ${duration} ${easing} both; animation-timeline: view(); animation-range: entry 0% entry ${Math.round(amount * 100)}%; }`);
@@ -296,7 +296,7 @@ function compileNodeCssOnly(node: MotionNode, m: NodeMotion): string[] {
       const fromDecl = styleDeclarations(fromState.style);
       if (!fromDecl.length) continue;
       const toDecl = cssOnlyToDecls(fromState.style);
-      const name = `impkt-m-${id}-load`;
+      const name = `impakt-m-${id}-load`;
       css.push(`@keyframes ${name} {\n  from { ${fromDecl.join('; ')}; }\n  to { ${toDecl.join('; ')}; }\n}`);
       css.push(`${sel} { animation: ${name} ${duration} ${easing} both; }`);
       css.push(`@media (prefers-reduced-motion: reduce) { ${sel} { animation: none; ${toDecl.join('; ')}; } }`);

@@ -84,7 +84,7 @@ const PERSONALITIES: Record<MotionPersonality, Personality> = {
 };
 
 /** The CSS custom-property prefix all tokens use. */
-export const CSS_VAR_PREFIX = '--impkt';
+export const CSS_VAR_PREFIX = '--impakt';
 
 /** Turn a dot-separated token path into a CSS custom-property name. */
 export const cssVarName = (path: string): string => `${CSS_VAR_PREFIX}-${path.replace(/\./g, '-')}`;
@@ -187,9 +187,9 @@ export function motionTokensStylesheet(input?: Partial<MotionInputs>, spaceBase 
 /** Inject motion tokens into the document as a `<style>` element. Call once per page load. */
 export function injectMotionTokens(input?: Partial<MotionInputs>, spaceBase = 4): void {
   if (typeof document === 'undefined') return;
-  const existing = document.getElementById('impkt-motion-tokens');
+  const existing = document.getElementById('impakt-motion-tokens');
   const el = existing ?? document.createElement('style');
-  el.id = 'impkt-motion-tokens';
+  el.id = 'impakt-motion-tokens';
   el.textContent = motionTokensStylesheet(input, spaceBase);
   if (!existing) document.head.appendChild(el);
 }
