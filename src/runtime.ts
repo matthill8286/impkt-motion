@@ -228,8 +228,8 @@ export function startMotion(root: ParentNode, plan: MotionPlan, options: Runtime
         for (const child of children) child.style.setProperty('--m-progress', progress.toFixed(4));
       };
       const onProgress = (e: Event) => apply((e as CustomEvent<{ progress: number }>).detail.progress);
-      el.addEventListener('impkt-scene-progress', onProgress);
-      cleanups.push(() => el.removeEventListener('impkt-scene-progress', onProgress));
+      el.addEventListener('impakt-scene-progress', onProgress);
+      cleanups.push(() => el.removeEventListener('impakt-scene-progress', onProgress));
       const current = (el as HTMLElement & { progress?: unknown }).progress;
       apply(typeof current === 'number' ? current : 0);
     }

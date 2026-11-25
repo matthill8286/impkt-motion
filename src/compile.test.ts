@@ -11,13 +11,13 @@ const node = (id: string, motion?: unknown, component = 'ui/card') =>
 describe('styleDeclarations', () => {
   it('composes transforms in a fixed order and names tokens by custom property', () => {
     expect(styleDeclarations({ x: 0, y: 'distance.near', scale: 0.9, rotate: -4 })).toEqual([
-      'transform: translate(0px, var(--impkt-motion-distance-near)) scale(0.9) rotate(-4deg)',
+      'transform: translate(0px, var(--impakt-motion-distance-near)) scale(0.9) rotate(-4deg)',
     ]);
-    expect(styleDeclarations({ y: '-space.1' })[0]).toContain('calc(-1 * var(--impkt-space-1))');
+    expect(styleDeclarations({ y: '-space.1' })[0]).toContain('calc(-1 * var(--impakt-space-1))');
     expect(styleDeclarations({ clip: 'bottom', radius: 'full', shadow: 'raised' })).toEqual([
       'clip-path: inset(100% 0 0 0)',
-      'box-shadow: var(--impkt-shadow-md)',
-      'border-radius: var(--impkt-radius-full)',
+      'box-shadow: var(--impakt-shadow-md)',
+      'border-radius: var(--impakt-radius-full)',
     ]);
   });
 });
@@ -31,8 +31,8 @@ describe('compileMotion', () => {
 
   it('applies the initial state only while motion runs and is allowed', () => {
     const { css } = compileMotion([node('hero', preset('rise'))]);
-    expect(css).toContain('.impkt-motion:not(.impkt-motion-reduced) [data-motion="hero"]:not([data-motion-state])');
-    expect(css).toContain('[data-motion="hero"][data-motion-state="hidden"] { transform: translate(0px, var(--impkt-motion-distance-near)); opacity: 0; }');
+    expect(css).toContain('.impakt-motion:not(.impakt-motion-reduced) [data-motion="hero"]:not([data-motion-state])');
+    expect(css).toContain('[data-motion="hero"][data-motion-state="hidden"] { transform: translate(0px, var(--impakt-motion-distance-near)); opacity: 0; }');
     expect(css).not.toMatch(/^\[data-motion="hero"\] \{[^}]*opacity: 0/m);
   });
 
@@ -49,8 +49,8 @@ describe('compileMotion', () => {
       to: 'hover',
       reverse: true,
       reduced: 'cut',
-      duration: 'var(--impkt-motion-spring-snappy-duration)',
-      easing: 'var(--impkt-motion-spring-snappy-easing)',
+      duration: 'var(--impakt-motion-spring-snappy-duration)',
+      easing: 'var(--impakt-motion-spring-snappy-easing)',
       delay: 0,
     });
   });
@@ -59,7 +59,7 @@ describe('compileMotion', () => {
     const { css, plan } = compileMotion([node('h1', preset('words-rise'), 'ui/heading')]);
     expect(plan.nodes[0].split).toBe('words');
     expect(css).toContain('[data-motion="h1"][data-motion-state="hidden"] > [data-motion-part]');
-    expect(css).toContain('var(--m-index, 0) * var(--impkt-motion-stagger-tight)');
+    expect(css).toContain('var(--m-index, 0) * var(--impakt-motion-stagger-tight)');
   });
 
   it('compiles a scene timeline to keyframes with a native and a fallback path', () => {
@@ -70,7 +70,7 @@ describe('compileMotion', () => {
     } as never, { parentId: 'stage' });
     const { css, plan } = compileMotion([scene, button]);
     expect(plan.scenes).toEqual([{ id: 'stage', drive: 'view' }]);
-    expect(css).toContain('[data-motion="stage"] { view-timeline-name: --impkt-scene; }');
+    expect(css).toContain('[data-motion="stage"] { view-timeline-name: --impakt-scene; }');
     expect(css).toContain('@supports (animation-timeline: view())');
     expect(css).toContain('@media (prefers-reduced-motion: reduce)');
   });
@@ -115,8 +115,8 @@ describe('choreography', () => {
 describe('page transitions', () => {
   it('names a shared element and times its morph from tokens', () => {
     const { css } = compileMotion([node('card', { share: { name: 'case-kleidi' } })]);
-    expect(css).toContain('[data-motion="card"] { view-transition-name: impkt-share-case-kleidi; }');
-    expect(css).toContain('::view-transition-group(impkt-share-case-kleidi) {');
+    expect(css).toContain('[data-motion="card"] { view-transition-name: impakt-share-case-kleidi; }');
+    expect(css).toContain('::view-transition-group(impakt-share-case-kleidi) {');
   });
 });
 
@@ -124,7 +124,7 @@ describe('new presets', () => {
   it('slide-left enters from the right edge', () => {
     const { css } = compileMotion([node('el', preset('slide-left'))]);
     expect(css).toContain('opacity: 0');
-    expect(css).toContain('var(--impkt-motion-distance-far)');
+    expect(css).toContain('var(--impakt-motion-distance-far)');
   });
 
   it('zoom-in enters from slightly larger', () => {
