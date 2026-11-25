@@ -9,7 +9,7 @@ You author motion as data attached to nodes. A compile step (`compileMotion`) ru
 1. **A scoped CSS stylesheet** — initial states, state rules, transition base rules, keyframe animations, scroll-driven scene timelines, and shared-element `view-transition-name` declarations.
 2. **A `MotionPlan` JSON object** — a lightweight instruction set the runtime reads in the browser.
 
-The runtime (`startMotion`) attaches to the DOM, listens for inputs (load, scroll into view, hover, press, focus, route change, data signals), and sets `data-motion-state` attributes. All timing is sourced from CSS custom properties, so `prefers-reduced-motion` and the `.impkt-motion-reduced` class gate everything without script changes.
+The runtime (`startMotion`) attaches to the DOM, listens for inputs (load, scroll into view, hover, press, focus, route change, data signals), and sets `data-motion-state` attributes. All timing is sourced from CSS custom properties, so `prefers-reduced-motion` and the `.impakt-motion-reduced` class gate everything without script changes.
 
 ## Install
 
@@ -97,7 +97,7 @@ type MotionStyle = {
 };
 ```
 
-Numeric values are written as literal `px`/`deg`. String values are resolved to CSS custom properties: `'distance.near'` → `var(--impkt-motion-distance-near)`.
+Numeric values are written as literal `px`/`deg`. String values are resolved to CSS custom properties: `'distance.near'` → `var(--impakt-motion-distance-near)`.
 
 ### Transitions
 
@@ -155,7 +155,7 @@ createMotionNode('c', preset('rise', { group: 'cards', offset: 'loose' }));
 
 The first group member starts immediately; each subsequent member starts after the previous one by its `offset`.
 
-`offset` defaults to `'base'` and can be `'tight'`, `'base'`, `'loose'` or `'none'` — resolved from the `--impkt-motion-stagger-*` tokens.
+`offset` defaults to `'base'` and can be `'tight'`, `'base'`, `'loose'` or `'none'` — resolved from the `--impakt-motion-stagger-*` tokens.
 
 ### Shared elements (page transitions)
 
@@ -388,7 +388,7 @@ This mode suits static sites and simple pages that don't need choreography, data
 
 ## Reduced motion
 
-Under `prefers-reduced-motion: reduce` or when the `.impkt-motion-reduced` class is present on an ancestor:
+Under `prefers-reduced-motion: reduce` or when the `.impakt-motion-reduced` class is present on an ancestor:
 
 - Initial states are not applied (the element shows immediately as authored).
 - Transitions with `reduced: 'skip'` are suppressed entirely.

@@ -1,5 +1,5 @@
 /**
- * React integration for @impkt/motion.
+ * React integration for @atomic-ui/motion.
  *
  * `useMotion` compiles a set of nodes' motion and starts the runtime once
  * the elements are mounted, cleaning up when the component unmounts.
@@ -37,7 +37,7 @@ export interface UseMotionOptions {
  *   const { css, rootRef } = useMotion(nodes);
  *   return (
  *     <div ref={rootRef}>
- *       {css && <style data-impkt-motion="">{css}</style>}
+ *       {css && <style data-impakt-motion="">{css}</style>}
  *       {nodes.map(n => <div key={n.id} data-motion={n.id}>{n.id}</div>)}
  *     </div>
  *   );
@@ -96,7 +96,7 @@ export function MotionLayer({ compiled, options }: MotionLayerProps) {
     const handle = startMotion(document, compiled.plan, { reduced, rate });
     return () => handle.stop();
   }, [compiled, reduced, rate]);
-  return <style data-impkt-motion="">{compiled.css}</style>;
+  return <style data-impakt-motion="">{compiled.css}</style>;
 }
 
 /**

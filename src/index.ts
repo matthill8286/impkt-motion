@@ -1,5 +1,5 @@
 /**
- * @impkt/motion — motion compiled to the platform.
+ * @atomic-ui/motion — motion compiled to the platform.
  *
  * `compileMotion` turns motion blocks on nodes into one scoped stylesheet
  * and a plan; `startMotion` reads the plan in the browser.
