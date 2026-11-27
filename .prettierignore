@@ -1,0 +1,14 @@
+# Dependencies, build output and generated files
+node_modules
+dist
+build
+out
+coverage
+.astro
+.next
+.vercel
+.turbo
+storybook-static
+pnpm-lock.yaml
+package-lock.json
+*.min.js
