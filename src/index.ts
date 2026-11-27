@@ -53,13 +53,7 @@ export {
   type SceneDrive,
 } from './compile';
 
-export {
-  keyOf,
-  resolveChoreography,
-  runtimeOf,
-  type ChoreographyIssue,
-  type TransitionKey,
-} from './choreography';
+export { keyOf, resolveChoreography, runtimeOf, type ChoreographyIssue, type TransitionKey } from './choreography';
 
 export { PRESETS, preset, type PresetName } from './presets';
 

@@ -43,7 +43,10 @@ export interface UseMotionOptions {
  *   );
  * }
  */
-export function useMotion(nodes: MotionNode[], options: UseMotionOptions = {}): {
+export function useMotion(
+  nodes: MotionNode[],
+  options: UseMotionOptions = {},
+): {
   css: string | null;
   rootRef: RefObject<HTMLElement | null>;
   compiled: CompiledMotion | null;

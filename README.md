@@ -21,7 +21,7 @@ React integration and tokens utility are opt-in:
 
 ```ts
 import { startMotion } from '@atomic-ui/motion/runtime';
-import { useMotion }    from '@atomic-ui/motion/react';
+import { useMotion } from '@atomic-ui/motion/react';
 import { injectMotionTokens } from '@atomic-ui/motion/tokens';
 ```
 
@@ -37,7 +37,7 @@ injectMotionTokens({ personality: 'lively' });
 
 // 2. Build nodes with presets (server or build).
 const nodes = [
-  createMotionNode('hero',   preset('hero-rise')),
+  createMotionNode('hero', preset('hero-rise')),
   createMotionNode('card-1', preset('rise', { node: 'hero' })),
   createMotionNode('card-2', preset('rise', { node: 'card-1' })),
 ];
@@ -63,17 +63,12 @@ A node is any element in your tree that can carry motion. Only the `id` is requi
 import { createMotionNode } from '@atomic-ui/motion';
 
 const node = createMotionNode(
-  'card',           // unique id — matches data-motion="card" on the DOM element
+  'card', // unique id — matches data-motion="card" on the DOM element
   {
-    states: [
-      { id: 'hover', style: { y: '-space.1', shadow: 'raised' } },
-    ],
-    transitions: [
-      { id: 'lift', from: 'rest', to: 'hover', on: 'hover', reverse: true,
-        with: { spring: 'snappy' }, reduced: 'cut' },
-    ],
+    states: [{ id: 'hover', style: { y: '-space.1', shadow: 'raised' } }],
+    transitions: [{ id: 'lift', from: 'rest', to: 'hover', on: 'hover', reverse: true, with: { spring: 'snappy' }, reduced: 'cut' }],
   },
-  { component: 'ui/card', parentId: 'section' }
+  { component: 'ui/card', parentId: 'section' },
 );
 ```
 
@@ -86,7 +81,7 @@ A state is a sparse visual override of the implicit `rest` state (the element as
 ```ts
 type MotionStyle = {
   opacity?: number;
-  x?: number | string;        // 'distance.near', '-space.2', etc.
+  x?: number | string; // 'distance.near', '-space.2', etc.
   y?: number | string;
   scale?: number;
   rotate?: number;
@@ -106,12 +101,12 @@ A transition moves a node from one state to another when an input fires.
 ```ts
 type MotionTransition = {
   id: string;
-  from: string;             // source state id, or 'rest'
-  to: string;               // target state id
-  on: MotionInput;          // 'load' | 'view' | 'hover' | 'press' | 'focus' | 'route' | 'data' | 'leave'
-  with?: MotionTiming;      // { spring?, duration?, easing?, delay? }
-  after?: MotionAfter;      // choreography: { node, offset? } | { group, offset? }
-  reverse?: boolean;        // return to 'from' state when input ends
+  from: string; // source state id, or 'rest'
+  to: string; // target state id
+  on: MotionInput; // 'load' | 'view' | 'hover' | 'press' | 'focus' | 'route' | 'data' | 'leave'
+  with?: MotionTiming; // { spring?, duration?, easing?, delay? }
+  after?: MotionAfter; // choreography: { node, offset? } | { group, offset? }
+  reverse?: boolean; // return to 'from' state when input ends
   reduced?: 'cut' | 'fade'; // behaviour under reduced-motion
 };
 ```
@@ -125,7 +120,7 @@ A timeline drives a node's visual state from a scene's scroll progress. The scen
 ```ts
 type MotionTimeline = {
   on: 'scene';
-  keys: TimelineKey[];  // { id, at: 0–1, state, with? }[]
+  keys: TimelineKey[]; // { id, at: 0–1, state, with? }[]
 };
 ```
 
@@ -169,31 +164,31 @@ createMotionNode('card', { share: { name: 'case-kleidi' } });
 
 `preset(name, follow?)` returns a `NodeMotion` object ready to pass to `createMotionNode`.
 
-| Preset | Effect |
-|---|---|
-| `rise` | Scroll-triggered fade + rise from below |
-| `fade` | Scroll-triggered opacity fade |
-| `wipe-up` | Clip-path wipe from bottom |
-| `iris-open` | Circular clip-path iris reveal |
-| `pop-in` | Springy scale in |
-| `focus-in` | Blur-to-sharp reveal |
-| `words-rise` | Per-word staggered rise |
-| `chars-rise` | Per-character staggered rise |
-| `lift` | Hover: lift + shadow |
-| `press` | Press: scale down |
-| `glow` | Hover: grow + glow shadow |
-| `shake` | Press: lateral shake |
-| `slide-left` | Fade + slide in from right |
-| `slide-right` | Fade + slide in from left |
-| `zoom-in` | Fade + scale in from 1.08 |
-| `zoom-out` | Fade + scale in from 0.9 |
-| `blur-out` | Heavy blur reveal |
-| `hero-rise` | Load-triggered rise (above-fold elements) |
-| `hero-words` | Load-triggered per-word rise |
-| `fade-out` | Exit: fade to transparent |
-| `rise-out` | Exit: fade and rise away |
-| `sink-out` | Exit: fade and sink |
-| `scale-out` | Exit: fade and scale down |
+| Preset        | Effect                                    |
+| ------------- | ----------------------------------------- |
+| `rise`        | Scroll-triggered fade + rise from below   |
+| `fade`        | Scroll-triggered opacity fade             |
+| `wipe-up`     | Clip-path wipe from bottom                |
+| `iris-open`   | Circular clip-path iris reveal            |
+| `pop-in`      | Springy scale in                          |
+| `focus-in`    | Blur-to-sharp reveal                      |
+| `words-rise`  | Per-word staggered rise                   |
+| `chars-rise`  | Per-character staggered rise              |
+| `lift`        | Hover: lift + shadow                      |
+| `press`       | Press: scale down                         |
+| `glow`        | Hover: grow + glow shadow                 |
+| `shake`       | Press: lateral shake                      |
+| `slide-left`  | Fade + slide in from right                |
+| `slide-right` | Fade + slide in from left                 |
+| `zoom-in`     | Fade + scale in from 1.08                 |
+| `zoom-out`    | Fade + scale in from 0.9                  |
+| `blur-out`    | Heavy blur reveal                         |
+| `hero-rise`   | Load-triggered rise (above-fold elements) |
+| `hero-words`  | Load-triggered per-word rise              |
+| `fade-out`    | Exit: fade to transparent                 |
+| `rise-out`    | Exit: fade and rise away                  |
+| `sink-out`    | Exit: fade and sink                       |
+| `scale-out`   | Exit: fade and scale down                 |
 
 ```ts
 import { preset } from '@atomic-ui/motion';
@@ -221,8 +216,8 @@ Motion personality and speed are sourced from CSS custom properties. Set them on
 import { injectMotionTokens } from '@atomic-ui/motion/tokens';
 
 injectMotionTokens({
-  personality: 'lively',   // 'calm' | 'lively' | 'expressive'
-  speed: 1.0,              // 0.75–1.25
+  personality: 'lively', // 'calm' | 'lively' | 'expressive'
+  speed: 1.0, // 0.75–1.25
 });
 ```
 
@@ -242,10 +237,7 @@ import { useMotion, MotionLayer, motionAttr } from '@atomic-ui/motion/react';
 import { startMotion } from '@atomic-ui/motion/runtime';
 
 function Page() {
-  const nodes = useMemo(() => [
-    createMotionNode('hero',   preset('hero-rise')),
-    createMotionNode('card-1', preset('rise', { node: 'hero' })),
-  ], []);
+  const nodes = useMemo(() => [createMotionNode('hero', preset('hero-rise')), createMotionNode('card-1', preset('rise', { node: 'hero' }))], []);
 
   const { css, rootRef, compiled } = useMotion(nodes, { motion: { personality: 'lively' } });
 
@@ -293,10 +285,7 @@ handle.destroy();            // remove all listeners
 Transitions with `on: { input: 'leave' }` fire when `handle.leave()` is called. Use them for explicit page/component exits:
 
 ```ts
-const nodes = [
-  createMotionNode('hero', preset('hero-rise')),
-  createMotionNode('hero-exit', preset('fade-out')),
-];
+const nodes = [createMotionNode('hero', preset('hero-rise')), createMotionNode('hero-exit', preset('fade-out'))];
 const handle = startMotion(document, plan);
 
 // Before navigating away:
@@ -368,7 +357,7 @@ Pass any `CompileOptions` alongside `nodes` to control the personality or CSS-on
 ```ts
 compileMotion(nodes, {
   motion: {
-    personality: 'calm',   // token set to compile into CSS vars
+    personality: 'calm', // token set to compile into CSS vars
     speed: 1.0,
   },
 });

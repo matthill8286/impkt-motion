@@ -175,14 +175,15 @@ function compileNode(node: MotionNode, m: NodeMotion, delays: Map<string, number
   if (m.timeline) {
     const name = `impakt-m-${node.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
     const byId = new Map(m.states.map((s) => [s.id, s.style]));
-    const keyed = m.timeline.keys.map((k) => (k.state === REST_STATE ? {} : byId.get(k.state) ?? {}));
+    const keyed = m.timeline.keys.map((k) => (k.state === REST_STATE ? {} : (byId.get(k.state) ?? {})));
     const moves = (prop: keyof MotionStyle) => keyed.some((st) => st[prop] !== undefined);
     const TRANSFORM = ['x', 'y', 'scale', 'rotate'] as const;
     const restFill = (style: MotionStyle): string[] => {
       const out: string[] = [];
       if (TRANSFORM.some(moves) && !TRANSFORM.some((p) => style[p] !== undefined)) out.push('transform: none');
       if (moves('opacity') && style.opacity === undefined) out.push('opacity: 1');
-      if ((moves('clip') || moves('clipStart')) && style.clip === undefined && style.clipStart === undefined) out.push(`clip-path: ${keyed.some((st) => st.clip === 'circle') ? CLIP_REST.circle : CLIP_REST.inset}`);
+      if ((moves('clip') || moves('clipStart')) && style.clip === undefined && style.clipStart === undefined)
+        out.push(`clip-path: ${keyed.some((st) => st.clip === 'circle') ? CLIP_REST.circle : CLIP_REST.inset}`);
       if (moves('blur') && style.blur === undefined) out.push('filter: blur(0px)');
       return out;
     };
@@ -195,14 +196,19 @@ function compileNode(node: MotionNode, m: NodeMotion, delays: Map<string, number
       return `  ${Math.round(k.at * 10000) / 100}% { ${decl.join('; ')}; }`;
     });
     css.push(`@keyframes ${name} {\n${frames.join('\n')}\n}`);
-    css.push(`.${ACTIVE_CLASS}:not(.${REDUCED_CLASS}) ${sel} { animation: ${name} 1s linear both; animation-play-state: paused; animation-delay: calc(var(--m-progress, 0) * -1s); }`);
-    const native = drive === 'view'
-      ? `animation-timeline: ${SCENE_TIMELINE}; animation-range: contain 0% contain 100%`
-      : drive === 'page'
-        ? 'animation-timeline: scroll(root block)'
-        : null;
+    css.push(
+      `.${ACTIVE_CLASS}:not(.${REDUCED_CLASS}) ${sel} { animation: ${name} 1s linear both; animation-play-state: paused; animation-delay: calc(var(--m-progress, 0) * -1s); }`,
+    );
+    const native =
+      drive === 'view'
+        ? `animation-timeline: ${SCENE_TIMELINE}; animation-range: contain 0% contain 100%`
+        : drive === 'page'
+          ? 'animation-timeline: scroll(root block)'
+          : null;
     if (native) {
-      css.push(`@supports (animation-timeline: view()) { .${ACTIVE_CLASS}:not(.${REDUCED_CLASS}) ${sel} { animation-play-state: running; animation-delay: 0s; ${native}; } }`);
+      css.push(
+        `@supports (animation-timeline: view()) { .${ACTIVE_CLASS}:not(.${REDUCED_CLASS}) ${sel} { animation-play-state: running; animation-delay: 0s; ${native}; } }`,
+      );
     }
     css.push(`.${ACTIVE_CLASS}[${SCRUB_ATTR}]:not(.${REDUCED_CLASS}) ${sel} { animation-timeline: auto; animation-play-state: paused; animation-delay: 0s; }`);
   }
@@ -288,7 +294,9 @@ function compileNodeCssOnly(node: MotionNode, m: NodeMotion): string[] {
       const name = `impakt-m-${id}-enter`;
       const amount = t.on.amount;
       css.push(`@keyframes ${name} {\n  from { ${fromDecl.join('; ')}; }\n  to { ${toDecl.join('; ')}; }\n}`);
-      css.push(`${sel} { animation: ${name} ${duration} ${easing} both; animation-timeline: view(); animation-range: entry 0% entry ${Math.round(amount * 100)}%; }`);
+      css.push(
+        `${sel} { animation: ${name} ${duration} ${easing} both; animation-timeline: view(); animation-range: entry 0% entry ${Math.round(amount * 100)}%; }`,
+      );
       css.push(`@supports not (animation-timeline: view()) { ${sel} { ${toDecl.join('; ')}; } }`);
       css.push(`@media (prefers-reduced-motion: reduce) { ${sel} { animation: none; ${toDecl.join('; ')}; } }`);
     } else if (input === 'load') {
@@ -360,9 +368,15 @@ export function compileMotion(nodes: readonly MotionNode[], options: CompileOpti
   const routed = nodes.some((n) => n.motion?.share || n.motion?.transitions.some((t) => t.on.input === 'route'));
   if (routed) {
     css.push('@view-transition { navigation: auto; }');
-    css.push(`::view-transition-old(root), ::view-transition-new(root) { animation-duration: ${v('motion.duration.base')}; animation-timing-function: ${v('motion.easing.standard')}; }`);
-    css.push('@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }');
-    css.push(`.${REDUCED_CLASS}::view-transition-group(*), .${REDUCED_CLASS}::view-transition-old(*), .${REDUCED_CLASS}::view-transition-new(*) { animation: none !important; }`);
+    css.push(
+      `::view-transition-old(root), ::view-transition-new(root) { animation-duration: ${v('motion.duration.base')}; animation-timing-function: ${v('motion.easing.standard')}; }`,
+    );
+    css.push(
+      '@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }',
+    );
+    css.push(
+      `.${REDUCED_CLASS}::view-transition-group(*), .${REDUCED_CLASS}::view-transition-old(*), .${REDUCED_CLASS}::view-transition-new(*) { animation: none !important; }`,
+    );
   }
 
   if (plan.nodes.length) {
