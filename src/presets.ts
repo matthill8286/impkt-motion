@@ -141,10 +141,7 @@ type StaggerOffset = 'tight' | 'base' | 'loose' | 'none';
  * const b = preset('rise', { group: 'cards' });
  * const c = preset('rise', { group: 'cards', offset: 'loose' });
  */
-export function preset(
-  name: PresetName,
-  follow?: { node: string; offset?: StaggerOffset } | { group: string; offset?: StaggerOffset },
-): NodeMotion {
+export function preset(name: PresetName, follow?: { node: string; offset?: StaggerOffset } | { group: string; offset?: StaggerOffset }): NodeMotion {
   const block = structuredClone(PRESETS[name]) as { transitions: Array<Record<string, unknown>> };
   if (follow) {
     for (const t of block.transitions) {

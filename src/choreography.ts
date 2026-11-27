@@ -25,13 +25,15 @@ function target(t: MotionTransition, byNode: ReadonlyMap<string, MotionNode>): {
   const node = byNode.get(after.node);
   if (!node) return {};
   const list = node.motion?.transitions ?? [];
-  const transition = after.transition
-    ? list.find((x) => x.id === after.transition)
-    : list.find((x) => x.on.input === t.on.input);
+  const transition = after.transition ? list.find((x) => x.id === after.transition) : list.find((x) => x.on.input === t.on.input);
   return { node, transition };
 }
 
-export function runtimeOf(t: MotionTransition, motion: ResolvedMotion, springDuration: (s: ResolvedMotion['spring'][keyof ResolvedMotion['spring']]) => number): number {
+export function runtimeOf(
+  t: MotionTransition,
+  motion: ResolvedMotion,
+  springDuration: (s: ResolvedMotion['spring'][keyof ResolvedMotion['spring']]) => number,
+): number {
   return 'spring' in t.with ? springDuration(motion.spring[t.with.spring]) : motion.duration[t.with.duration];
 }
 
@@ -43,10 +45,7 @@ export function runtimeOf(t: MotionTransition, motion: ResolvedMotion, springDur
  * Group-based `after` chains members in document order: each member starts
  * after the previous one's transition, by the stagger offset.
  */
-export function resolveChoreography(
-  nodes: readonly MotionNode[],
-  motion: ResolvedMotion,
-): { delays: Map<TransitionKey, number>; issues: ChoreographyIssue[] } {
+export function resolveChoreography(nodes: readonly MotionNode[], motion: ResolvedMotion): { delays: Map<TransitionKey, number>; issues: ChoreographyIssue[] } {
   const byNode = new Map(nodes.map((n) => [n.id, n]));
   const delays = new Map<TransitionKey, number>();
   const issues: ChoreographyIssue[] = [];
@@ -96,13 +95,23 @@ export function resolveChoreography(
       }
       const other = byNode.get(pred.nodeId);
       if (!other) {
-        issues.push({ nodeId: node.id, transitionId: t.id, kind: 'missing-node', message: `The transition "${t.id}" is in group "${t.after.group}" but its predecessor node "${pred.nodeId}" is not on the page.` });
+        issues.push({
+          nodeId: node.id,
+          transitionId: t.id,
+          kind: 'missing-node',
+          message: `The transition "${t.id}" is in group "${t.after.group}" but its predecessor node "${pred.nodeId}" is not on the page.`,
+        });
         delays.set(key, 0);
         return 0;
       }
       const prevTransition = other.motion?.transitions.find((x) => x.id === pred.transitionId);
       if (!prevTransition) {
-        issues.push({ nodeId: node.id, transitionId: t.id, kind: 'missing-transition', message: `The transition "${t.id}" is in group "${t.after.group}" but the predecessor transition "${pred.transitionId}" was not found.` });
+        issues.push({
+          nodeId: node.id,
+          transitionId: t.id,
+          kind: 'missing-transition',
+          message: `The transition "${t.id}" is in group "${t.after.group}" but the predecessor transition "${pred.transitionId}" was not found.`,
+        });
         delays.set(key, 0);
         return 0;
       }
@@ -116,12 +125,22 @@ export function resolveChoreography(
 
     const { node: other, transition } = target(t, byNode);
     if (!other) {
-      issues.push({ nodeId: node.id, transitionId: t.id, kind: 'missing-node', message: `The transition "${t.id}" follows node "${t.after.node}", which is not on the page.` });
+      issues.push({
+        nodeId: node.id,
+        transitionId: t.id,
+        kind: 'missing-node',
+        message: `The transition "${t.id}" follows node "${t.after.node}", which is not on the page.`,
+      });
       delays.set(key, 0);
       return 0;
     }
     if (!transition) {
-      issues.push({ nodeId: node.id, transitionId: t.id, kind: 'missing-transition', message: `The transition "${t.id}" follows node "${t.after.node}", which has no matching transition.` });
+      issues.push({
+        nodeId: node.id,
+        transitionId: t.id,
+        kind: 'missing-transition',
+        message: `The transition "${t.id}" follows node "${t.after.node}", which has no matching transition.`,
+      });
       delays.set(key, 0);
       return 0;
     }

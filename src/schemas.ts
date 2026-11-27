@@ -134,8 +134,7 @@ export const MotionShareSchema = z.strictObject({
 });
 export type MotionShare = z.infer<typeof MotionShareSchema>;
 
-const issue = (ctx: z.RefinementCtx, path: (string | number)[], message: string) =>
-  ctx.addIssue({ code: z.ZodIssueCode.custom, path, message });
+const issue = (ctx: z.RefinementCtx, path: (string | number)[], message: string) => ctx.addIssue({ code: z.ZodIssueCode.custom, path, message });
 
 export const NodeMotionSchema = z
   .strictObject({

@@ -5,8 +5,7 @@ import { compileMotion, styleDeclarations } from './compile';
 import { createMotionNode } from './schemas';
 import { preset } from './presets';
 
-const node = (id: string, motion?: unknown, component = 'ui/card') =>
-  createMotionNode(id, motion as never, { component });
+const node = (id: string, motion?: unknown, component = 'ui/card') => createMotionNode(id, motion as never, { component });
 
 describe('styleDeclarations', () => {
   it('composes transforms in a fixed order and names tokens by custom property', () => {
@@ -64,10 +63,24 @@ describe('compileMotion', () => {
 
   it('compiles a scene timeline to keyframes with a native and a fallback path', () => {
     const scene = createMotionNode('stage', undefined, { component: 'ui/scene' });
-    const button = createMotionNode('cta', {
-      states: [{ id: 'note', style: { rotate: -4, radius: 'sm' } }, { id: 'live', style: { radius: 'full', shadow: 'glow' } }],
-      timeline: { on: 'scene', keys: [{ id: 'a', at: 0, state: 'note' }, { id: 'b', at: 0.5, state: 'rest', with: { spring: 'bouncy' } }, { id: 'c', at: 1, state: 'live' }] },
-    } as never, { parentId: 'stage' });
+    const button = createMotionNode(
+      'cta',
+      {
+        states: [
+          { id: 'note', style: { rotate: -4, radius: 'sm' } },
+          { id: 'live', style: { radius: 'full', shadow: 'glow' } },
+        ],
+        timeline: {
+          on: 'scene',
+          keys: [
+            { id: 'a', at: 0, state: 'note' },
+            { id: 'b', at: 0.5, state: 'rest', with: { spring: 'bouncy' } },
+            { id: 'c', at: 1, state: 'live' },
+          ],
+        },
+      } as never,
+      { parentId: 'stage' },
+    );
     const { css, plan } = compileMotion([scene, button]);
     expect(plan.scenes).toEqual([{ id: 'stage', drive: 'view' }]);
     expect(css).toContain('[data-motion="stage"] { view-timeline-name: --impakt-scene; }');
@@ -95,11 +108,7 @@ describe('choreography', () => {
   });
 
   it('reports a cycle and a missing node instead of hanging', () => {
-    const nodes = [
-      node('a', preset('rise', { node: 'b' })),
-      node('b', preset('rise', { node: 'a' })),
-      node('c', preset('rise', { node: 'nowhere' })),
-    ];
+    const nodes = [node('a', preset('rise', { node: 'b' })), node('b', preset('rise', { node: 'a' })), node('c', preset('rise', { node: 'nowhere' }))];
     const { issues } = resolveChoreography(nodes, m);
     expect(issues.map((i) => i.kind).sort()).toEqual(['cycle', 'missing-node']);
   });

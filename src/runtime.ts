@@ -10,7 +10,17 @@
  * scroll fallback, which runs only for scenes. Plain DOM, so it works under
  * Lit, React, Vue, Angular or a static page.
  */
-import { ACTIVE_CLASS, MOTION_ATTR, REDUCED_CLASS, SCENE_ATTR, STATE_ATTR, nodeSelector, type MotionPlan, type PlannedNode, type PlannedTransition } from './compile';
+import {
+  ACTIVE_CLASS,
+  MOTION_ATTR,
+  REDUCED_CLASS,
+  SCENE_ATTR,
+  STATE_ATTR,
+  nodeSelector,
+  type MotionPlan,
+  type PlannedNode,
+  type PlannedTransition,
+} from './compile';
 
 export interface RuntimeOptions {
   /** Defaults to the visitor's `prefers-reduced-motion`. */
